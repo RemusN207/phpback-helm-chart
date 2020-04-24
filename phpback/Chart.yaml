@@ -1,0 +1,7 @@
+apiVersion:  v1
+appVersion:  latest
+description: phpback
+name:        phpback
+version:     1.0.0
+sources:
+  - git@github.com:scretu/phpback-helm-chart.git

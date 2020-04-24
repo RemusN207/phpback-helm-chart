@@ -1,0 +1,49 @@
+# IMPORTANT:                                                                          some of these settings get hardcoded in the MySQL database => even if you change them an re-deploy the helm chart, they might not work
+phpback:
+# Namespace you want to use. Default is "default" Namespace
+  namespace:                                                                          default
+  service:
+# Type of service you want to create. e.g. Loadbalancer, Nodeport, etc. Default is LoadBalancer
+    type:                                                                             {}
+# Target port you want to use for your service. Default is port 80.
+    targetPort:                                                                       {}
+# Use below to provide any annotations for k8s cluster.
+# E.g. If you have k8s cluster in using external-dns which creates DNS record for service
+#      use following annotation and provide DNS value.
+# Similarly, use annotation to create tags for your resource
+# Annotations are optional, if not provided, no annotations will be added for service.
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname:                                      "phpback.fqdn"
+      service.beta.kubernetes.io/aws-load-balancer-internal:                          "true"
+      service.beta.kubernetes.io/aws-load-balancer-ssl-cert:                          "arn:aws:acm:region:account-no:certificate/UUID"
+      service.beta.kubernetes.io/aws-load-balancer-ssl-ports:                         "https"
+      service.beta.kubernetes.io/aws-load-balancer-backend-protocol:                  "http"
+      service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags:          "Name=phpback-elb,Service=phpback,Environment=prod"
+      service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+  image:
+# Provide url for Docker image. <Required>
+    url:                                                                              scretu/phpback
+    tag:                                                                              latest
+    pullPolicy:                                                                       Never
+
+mysql:
+  install:                                                                            true
+  endpoint:                                                                           phpback-mysql
+  mysqlUser:                                                                          phpback
+  mysqlPassword:                                                                      phpbackpwd
+  mysqlDatabase:                                                                      phpbackdb
+
+app:
+ title:                                                                               'My Application Feedback'
+ adminEmail:                                                                          'x@x.x'
+ adminPwd:                                                                            'complic8ed'
+
+captcha:
+ public:                                                                              ''
+ private:                                                                             ''
+
+smtp:
+ host:                                                                                ''
+ user:                                                                                ''
+ pwd:                                                                                 ''
+ port:                                                                                '"25"'

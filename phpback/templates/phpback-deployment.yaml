@@ -1,0 +1,87 @@
+{{/*
+# Copyright 2017 The Kubernetes Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+*/}}
+{{ $uuid := uuidv4 }} {{/* force uniqueness for every execution of helm */}}
+---
+
+kind:                              Deployment
+apiVersion:                        apps/v1
+metadata:
+  # This uses a "fullname" template (see _helpers)
+  # Basing names on .Release.Name means that the same chart can be installed
+  # multiple times into the same namespace.
+  name:                            {{ template "phpback.fullname" . }}
+  labels:
+    heritage:                      {{ .Release.Service | trunc 63 | quote }}
+    release:                       {{ .Release.Name | trunc 63 |  quote }}
+    chart:                         {{ printf "%s-%s" .Chart.Name .Chart.Version | trunc 63 | quote }}
+    revision:                      {{ .Release.Revision | quote }}
+    appVersion:                    {{ .Chart.AppVersion | trunc 63 | quote }}
+    k8s-app:                       {{ .Chart.Name }}
+    kubernetes.io/cluster-service: "true"
+    uuid:                          {{ $uuid | quote }}
+  namespace:                       {{ default "default" .Values.phpback.namespace }}
+spec:
+  replicas:                        1
+  revisionHistoryLimit:            10
+  selector:
+    matchLabels:
+      k8s-app:                     {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        k8s-app:                   {{ .Chart.Name }}
+    spec:
+      containers:
+      - name:                      {{ .Chart.Name }}
+        image:                     {{ .Values.phpback.image.url }}:{{ .Values.phpback.image.tag }}
+        imagePullPolicy:           IfNotPresent
+        ports:
+        - containerPort:           80
+          protocol:                TCP
+        livenessProbe:
+          httpGet:
+            scheme:                HTTP
+            path:                  /
+            port:                  80
+          initialDelaySeconds:     360
+          timeoutSeconds:          360
+        env:
+        - name:                    "MYSQL_PORT_3306_TCP_ADDR"
+          value:                   {{ .Values.mysql.endpoint }}
+        - name:                    "MYSQL_USER"
+          value:                   {{ .Values.mysql.mysqlUser }}
+        - name:                    "MYSQL_PASSWORD"
+          value:                   {{ .Values.mysql.mysqlPassword }}
+        - name:                    "MYSQL_NAME"
+          value:                   {{ .Values.mysql.mysqlDatabase }}
+        - name:                    "APP_TITLE"
+          value:                   {{ .Values.app.title }}
+        - name:                    "APP_ADMIN_EMAIL"
+          value:                   {{ .Values.app.adminEmail }}
+        - name:                    "APP_ADMIN_PWD"
+          value:                   {{ .Values.app.adminPwd }}
+        - name:                    "APP_CAPTCHA_PUBLIC"
+          value:                   {{ .Values.captcha.public }}
+        - name:                    "APP_CAPTCHA_PRIVATE"
+          value:                   {{ .Values.captcha.private }}
+        - name:                    "APP_SMTP_HOST"
+          value:                   {{ .Values.smtp.host }}
+        - name:                    "APP_SMTP_USER"
+          value:                   {{ .Values.smtp.user }}
+        - name:                    "APP_SMTP_PWD"
+          value:                   {{ .Values.smtp.pwd }}
+        - name:                    "APP_SMTP_PORT"
+          value:                   {{ .Values.smtp.port }}
