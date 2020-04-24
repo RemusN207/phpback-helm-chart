@@ -1,5 +1,9 @@
 # PHPBack - Docker, docker-compose and Kubernetes Helm chart
 
+## About PHPBack
+
+[PHPBack](http://www.phpback.org/) is an open source feedback system. You can find it on [GitHub](https://github.com/ivandiazwm/phpback) as well
+
 ## Building
 
 ### Building and pushing the Docker image
