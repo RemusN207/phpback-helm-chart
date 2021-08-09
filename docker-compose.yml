@@ -15,7 +15,7 @@ services:
   phpback:
     depends_on:
       - db
-    image:                      scretu/phpback:latest
+    image:                      remusnastasa/phpback:latest
     restart:                    on-failure
     environment:
       MYSQL_PORT_3306_TCP_ADDR: db
